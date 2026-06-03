@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IZAKA-YA 会員登録後ステップメール 設計書</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: #f5f3ef;
+    color: #1a1a2e;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Header ── */
+  .page-header {
+    background: linear-gradient(135deg, #1f1a17 0%, #5c2b1f 60%, #e85d3c 100%);
+    color: #fff;
+    padding: 48px 24px 36px;
+    text-align: center;
+  }
+  .page-header h1 { font-size: 26px; font-weight: 700; margin-bottom: 8px; letter-spacing: .02em; }
+  .page-header p { font-size: 13px; color: #f7d3c2; }
+  .page-header .meta {
+    display: inline-flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; justify-content: center;
+    font-size: 12px; color: #ffd9c4;
+  }
+  .page-header .meta span { background: rgba(255,255,255,.08); padding: 4px 12px; border-radius: 6px; }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 22px;
+    flex-wrap: wrap;
+    padding: 14px 20px;
+    background: #fff;
+    border-bottom: 1px solid #e7dfd5;
+    font-size: 12px;
+    font-weight: 500;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; color: #475569; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .legend-dot.blue { background: #3b82f6; }
+  .legend-dot.orange { background: #e85d3c; }
+  .legend-dot.gold { background: #d4a437; }
+  .legend-dot.green { background: #22c55e; }
+  .legend-dot.gray { background: #94a3b8; }
+
+  /* ── Sticky TOC ── */
+  .nav-toc {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 10px 20px;
+    background: #fff;
+    border-bottom: 1px solid #e7dfd5;
+    position: sticky;
+    top: 46px;
+    z-index: 99;
+  }
+  .nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 16px;
+    text-decoration: none;
+    color: #475569;
+    background: #f4ede4;
+    border: 1px solid #e7dfd5;
+    transition: all .15s;
+    cursor: pointer;
+  }
+  .nav-btn:hover { background: #ebe1d2; }
+  .nav-btn .nav-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* ── Container ── */
+  .container {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+  }
+
+  /* ── Intro ── */
+  .intro {
+    background: #fff;
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.04);
+  }
+  .intro h2 { font-size: 16px; font-weight: 700; margin-bottom: 12px; color: #1a1a2e; }
+  .intro p { font-size: 13px; color: #475569; margin-bottom: 8px; }
+  .intro ul { font-size: 13px; color: #475569; padding-left: 20px; }
+  .intro li { margin-bottom: 4px; }
+  .intro strong { color: #1a1a2e; }
+  .intro code { background: #f4ede4; padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+
+  /* ── Step card ── */
+  .step { margin-bottom: 0; scroll-margin-top: 130px; }
+
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+    overflow: hidden;
+    transition: box-shadow .2s;
+  }
+  .card:hover { box-shadow: 0 2px 6px rgba(0,0,0,.08), 0 8px 24px rgba(0,0,0,.06); }
+
+  .card-border-blue   { border-left: 4px solid #3b82f6; }
+  .card-border-orange { border-left: 4px solid #e85d3c; }
+  .card-border-gold   { border-left: 4px solid #d4a437; }
+  .card-border-green  { border-left: 4px solid #22c55e; }
+  .card-border-gray   { border-left: 4px solid #94a3b8; }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid #f1ebe2;
+    flex-wrap: wrap;
+  }
+  .card-day {
+    font-size: 12px; font-weight: 700; color: #fff;
+    background: #1a1a2e; padding: 4px 10px; border-radius: 6px; white-space: nowrap;
+  }
+  .card-title { font-size: 16px; font-weight: 700; flex: 1; color: #1a1a2e; }
+  .badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+  .badge-intro    { background: #dbeafe; color: #1e40af; }
+  .badge-camp     { background: #ffe4d6; color: #9a3412; }
+  .badge-edu      { background: #fef3c7; color: #92400e; }
+  .badge-sec      { background: #dcfce7; color: #166534; }
+  .badge-cross    { background: #fde68a; color: #854d0e; }
+  .badge-remind   { background: #ffe4e6; color: #9f1239; }
+
+  .card-body { padding: 18px 22px 22px; }
+  .card-trigger {
+    font-size: 11px; color: #64748b; margin-bottom: 12px;
+    background: #faf7f2; border: 1px solid #ebe1d2;
+    padding: 6px 10px; border-radius: 6px;
+  }
+  .card-trigger b { color: #1a1a2e; }
+
+  /* ── Email preview (mail-like layout) ── */
+  .mail-preview {
+    background: #fff;
+    border: 1px solid #ebe1d2;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 10px 0;
+  }
+  .mail-head {
+    background: #faf7f2;
+    border-bottom: 1px solid #ebe1d2;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #475569;
+  }
+  .mail-head .from { font-weight: 600; color: #1a1a2e; }
+  .mail-head .subj { display: block; font-weight: 700; color: #1a1a2e; font-size: 14px; margin-top: 4px; }
+  .mail-body {
+    padding: 18px 18px 20px;
+    font-size: 13px;
+    line-height: 1.85;
+    color: #1a1a2e;
+    white-space: pre-line;
+  }
+  .mail-body .cta {
+    display: inline-block;
+    margin: 12px 0;
+    padding: 10px 22px;
+    background: linear-gradient(135deg, #e85d3c, #ff8a5a);
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+    border-radius: 6px;
+    text-decoration: none;
+    box-shadow: 0 2px 4px rgba(232,93,60,.25);
+  }
+  .mail-body .cta.dark {
+    background: linear-gradient(135deg, #1a1a2e, #2c2750);
+    color: #ffd9c4;
+  }
+  .mail-body .cta.gold {
+    background: linear-gradient(135deg, #c9a227, #e7c14b);
+    color: #1a1a2e;
+  }
+  .mail-body .cta.green {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #fff;
+  }
+  .mail-body .small { font-size: 11px; color: #64748b; }
+
+  /* ── Sections inside email ── */
+  .step-list {
+    background: #faf7f2;
+    border: 1px solid #ebe1d2;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 12px 0;
+  }
+  .step-list ol { padding-left: 18px; font-size: 13px; line-height: 1.9; }
+  .step-list li { margin-bottom: 6px; }
+  .step-list b { color: #1a1a2e; }
+
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 12px 0;
+  }
+  .feature-cell {
+    background: #faf7f2;
+    border: 1px solid #ebe1d2;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  .feature-cell h5 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #e85d3c;
+    margin-bottom: 4px;
+  }
+
+  .camp-box {
+    background: linear-gradient(135deg, #fff5ed 0%, #ffe4d6 100%);
+    border: 2px solid #e85d3c;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin: 12px 0;
+  }
+  .camp-box .rate {
+    font-size: 28px;
+    font-weight: 800;
+    color: #e85d3c;
+    line-height: 1.2;
+  }
+  .camp-box .rate small {
+    font-size: 14px;
+    color: #1a1a2e;
+    font-weight: 600;
+  }
+  .camp-box h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 4px 0 6px;
+    color: #1a1a2e;
+  }
+  .camp-box p { font-size: 12px; color: #475569; }
+
+  .compare-box {
+    border: 1px solid #ebe1d2;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 12px 0;
+  }
+  .compare-row { display: grid; grid-template-columns: 1fr 1fr; }
+  .compare-cell {
+    padding: 12px 14px;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  .compare-cell.head {
+    font-weight: 700;
+    font-size: 13px;
+    border-bottom: 1px solid #ebe1d2;
+  }
+  .compare-cell.left { background: #f8f7f4; border-right: 1px solid #ebe1d2; }
+  .compare-cell.right { background: #fff5ed; }
+  .compare-cell.left.head { color: #475569; }
+  .compare-cell.right.head { color: #9a3412; }
+
+  .callout {
+    background: #fef9c3;
+    border-left: 4px solid #d4a437;
+    padding: 12px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #713f12;
+    margin: 12px 0;
+    line-height: 1.7;
+  }
+  .callout b { display: block; margin-bottom: 4px; color: #1a1a2e; }
+
+  .cross-card {
+    background: linear-gradient(135deg, #fff8e1 0%, #fefce8 100%);
+    border: 1px solid #facc15;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 12px 0;
+  }
+  .cross-card h4 { font-size: 14px; font-weight: 700; margin-bottom: 6px; color: #1a1a2e; }
+  .cross-card p { font-size: 12px; color: #475569; margin-bottom: 8px; }
+
+  .security-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin: 12px 0;
+  }
+  .security-cell {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+  .security-cell h5 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #166534;
+    margin-bottom: 4px;
+  }
+
+  /* ── Note / Memo ── */
+  .note {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: #f4ede4;
+    border-left: 3px solid #64748b;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #334155;
+    line-height: 1.7;
+  }
+  .note b { color: #1a1a2e; }
+
+  /* ── Flow arrow ── */
+  .flow-arrow {
+    height: 28px; display: flex; justify-content: center; align-items: center; color: #cbd5e1; font-size: 20px;
+  }
+  .flow-arrow::after { content: '↓'; }
+
+  /* ── Feedback ── */
+  .feedback-area {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed #ebe1d2;
+  }
+  .feedback-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #e85d3c;
+    background: #ffe4d6;
+    border: 1px solid #fcb89e;
+    border-radius: 6px;
+    padding: 4px 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .feedback-toggle .fb-icon {
+    font-size: 10px;
+    background: #e85d3c;
+    color: #fff;
+    padding: 1px 6px;
+    border-radius: 3px;
+  }
+  .feedback-toggle .fb-count {
+    display: none; font-size: 10px; color: #9a3412; background: #ffd9c4;
+    padding: 0 6px; border-radius: 10px;
+  }
+  .feedback-toggle.has-content .fb-count { display: inline; }
+  .feedback-body { display: none; margin-top: 8px; }
+  .feedback-body.open { display: block; }
+  .feedback-textarea {
+    width: 100%;
+    min-height: 70px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 12px;
+    line-height: 1.6;
+    resize: vertical;
+    color: #1a1a2e;
+    background: #faf7f2;
+  }
+  .feedback-textarea:focus { outline: none; border-color: #e85d3c; background: #fff; }
+  .feedback-status { font-size: 10px; color: #94a3b8; margin-top: 4px; }
+
+  .export-bar {
+    text-align: center;
+    margin: 16px auto 0;
+  }
+  .export-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #e85d3c;
+    background: #ffe4d6;
+    border: 1px solid #fcb89e;
+    border-radius: 6px;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all .15s;
+    margin: 0 4px;
+  }
+  .export-btn:hover { background: #ffd9c4; }
+  .export-btn.danger { color: #ef4444; background: #fef2f2; border-color: #fecaca; }
+  .export-btn.danger:hover { background: #fee2e2; }
+
+  /* ── Responsive ── */
+  @media (max-width: 700px) {
+    .compare-row { grid-template-columns: 1fr; }
+    .compare-cell.left { border-right: 0; border-bottom: 1px solid #ebe1d2; }
+    .feature-grid { grid-template-columns: 1fr; }
+    .security-grid { grid-template-columns: 1fr; }
+    .nav-toc { top: 44px; }
+    .page-header h1 { font-size: 20px; }
+  }
+  @media print {
+    .legend, .nav-toc, .export-bar, .feedback-area { display: none; }
+    body { background: #fff; }
+    .card { box-shadow: none; border: 1px solid #ebe1d2; break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>IZAKA-YA 会員登録後 ステップメール 設計書</h1>
+  <p>使い方 → キャンペーン → 教育 → セキュリティ → クロスセル → 最終フォロー</p>
+  <div class="meta">
+    <span>v1.0｜2026-05-15</span>
+    <span>Leit On 大石</span>
+    <span>対象: 登録済み・未稼働ユーザー</span>
+  </div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot blue"></div>導入・使い方</div>
+  <div class="legend-item"><div class="legend-dot orange"></div>キャンペーン</div>
+  <div class="legend-item"><div class="legend-dot gold"></div>教育コンテンツ</div>
+  <div class="legend-item"><div class="legend-dot green"></div>セキュリティ・紹介</div>
+  <div class="legend-item"><div class="legend-dot gray"></div>クロスセル・リマインド</div>
+</div>
+
+<div class="nav-toc">
+  <a href="#step-day0" class="nav-btn"><div class="nav-dot" style="background:#3b82f6"></div>Day 0 ウェルカム＋使い方</a>
+  <a href="#step-day1" class="nav-btn"><div class="nav-dot" style="background:#e85d3c"></div>Day 1 キャンペーン</a>
+  <a href="#step-day3" class="nav-btn"><div class="nav-dot" style="background:#d4a437"></div>Day 3 教育＋FAQ</a>
+  <a href="#step-day5" class="nav-btn"><div class="nav-dot" style="background:#22c55e"></div>Day 5 セキュリティ＋紹介</a>
+  <a href="#step-day7" class="nav-btn"><div class="nav-dot" style="background:#94a3b8"></div>Day 7 CryptoPawnクロスセル</a>
+  <a href="#step-day14" class="nav-btn"><div class="nav-dot" style="background:#94a3b8"></div>Day 14 最終リマインド</a>
+</div>
+
+<div class="container">
+
+  <!-- ── 全体設計 ── -->
+  <div class="intro">
+    <h2>このステップメールの設計方針</h2>
+    <p>
+      <strong>目的</strong>：会員登録済みの未稼働ユーザーを、教育＋キャンペーン訴求で「初回レンディング開始」まで導く。あわせて姉妹サービスCryptoPawnへのクロスセルで、暗号資産の活かし方の選択肢を広げる。
+    </p>
+    <p><strong>サービス情報</strong>：IZAKA-YA（運営: Izakaya Limited / 香港）｜公式: <code>izakaya.tech</code>｜サポート: <code>support-izakaya.zendesk.com/hc/ja</code></p>
+    <p><strong>USP</strong>：KYC不要・3分登録／最大年利12%（プロモ時100〜500%）／Fireblocks採用・SOC 2 TYPE 2認証／業界最安値のスワップ手数料／クレカでの仮想通貨購入対応</p>
+    <p><strong>配信媒体</strong>：<b>SendGrid</b>（Marketing Campaigns / Dynamic Templates）にて配信</p>
+    <p><strong>全6通の役割分担</strong>：</p>
+    <ul>
+      <li><strong>Day 0</strong>：ウェルカム＋使い方の説明（レンディング／スワップ／カード購入の3機能）</li>
+      <li><strong>Day 1</strong>：キャンペーン紹介（年利500% 新規体験レンディング・百祭り・三三祭り）</li>
+      <li><strong>Day 3</strong>：教育「眠っている暗号資産が、複利で育つ」＋ FAQ</li>
+      <li><strong>Day 5</strong>：セキュリティ・運営体制＋友人紹介プログラム</li>
+      <li><strong>Day 7</strong>：クロスセル「現金が必要ならCryptoPawn」</li>
+      <li><strong>Day 14</strong>：最終リマインド（キャンペーン締切活用）</li>
+    </ul>
+  </div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- Day 0: ウェルカム＋使い方 -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="step" id="step-day0">
+    <div class="card card-border-blue">
+      <div class="card-header">
+        <span class="card-day">Day 0</span>
+        <span class="card-title">ウェルカム＋使い方の説明（3機能）</span>
+        <span class="badge badge-intro">導入</span>
+      </div>
+      <div class="card-body">
+        <div class="card-trigger"><b>トリガー</b>：会員登録完了直後（即時）｜<b>配信形式</b>：HTMLメール（画像／スクショ差し込み推奨）</div>
+
+        <div class="mail-preview">
+          <div class="mail-head">
+            <span class="from">IZAKA-YA 運営事務局 &lt;info@izakaya.tech&gt;</span>
+            <span class="subj">【ご登録ありがとうございます】IZAKA-YAの使い方ガイド（レンディング／スワップ／購入）</span>
+          </div>
+          <div class="mail-body">{{user_name}} 様
+
+このたびはIZAKA-YAにご登録いただきありがとうございます。
+これから、保有する暗号資産を<b>「預けて、増やす」</b>体験をご活用いただけます。
+
+本日は、IZAKA-YAでできる<b>3つの機能</b>と、レンディング開始までの操作手順をご案内します。
+
+<div class="feature-grid">
+<div class="feature-cell">
+<h5>① 預ける（レンディング）</h5>
+最大年利12%、プロモ時は100〜500%。<b>最低1日から</b>運用可能。預けて待つだけで、暗号資産が増えます。
+</div>
+<div class="feature-cell">
+<h5>② 交換する（スワップ）</h5>
+<b>業界最安値の手数料</b>で、保有銘柄を別の銘柄に即時交換。レンディング前の銘柄調整にも便利です。
+</div>
+<div class="feature-cell">
+<h5>③ 購入する（クレカ）</h5>
+VISA / Mastercard で<b>日本円から直接仮想通貨を購入</b>。取引所を経由せずIZAKA-YA内で完結します。
+</div>
+</div>
+
+──────────────────────
+■ レンディング開始までの手順
+──────────────────────
+<div class="step-list"><ol>
+<li><b>マイページにログイン</b>
+└ <code>izakaya.tech</code> から登録メールアドレス／パスワードでログイン。</li>
+<li><b>2段階認証の設定（強く推奨）</b>
+└ セキュリティ設定から、2段階認証を有効化。資産保護のため最優先で設定をお願いします。</li>
+<li><b>暗号資産の入金</b>
+└ お手持ちの取引所／ウォレットから、IZAKA-YAのご自身のアドレスへ送金。
+└ または、クレジットカード（VISA / Mastercard）でその場で購入も可能。</li>
+<li><b>レンディング商品を選ぶ</b>
+└ 年利・期間を確認して、お好きなプランを選択。<b>最低1日から</b>始められます。</li>
+<li><b>「預ける」をタップで運用開始</b>
+└ 期間終了時に元本＋利息が自動で戻ってきます。</li>
+</ol></div>
+
+<a href="https://izakaya.tech/" class="cta">マイページで始める（izakaya.tech）</a>
+
+──────────────────────
+■ よくあるご質問
+──────────────────────
+<b>Q. 本人確認（KYC）は必要ですか？</b>
+A. IZAKA-YAは<b>KYC不要</b>でご利用いただけます（トラベルルール適用外）。
+
+<b>Q. 最低いくらから預けられますか？</b>
+A. 最低1日から、お好きな金額で運用を始められます（プロモーション特典の対象には条件があります。Day 1キャンペーン案内をご参照ください）。
+
+<b>Q. 途中で引き出せますか？</b>
+A. 商品によって条件が異なります。各レンディング商品の詳細画面をご確認ください。
+
+<b>Q. 対応している暗号資産は？</b>
+A. BTC・XRP・USDTなどの主要銘柄に対応しています。
+
+──────────────────────
+ご不明点は <a href="https://izakaya.tech/contact/" style="color:#e85d3c;">お問い合わせフォーム</a> よりお気軽にどうぞ。
+
+IZAKA-YA 運営事務局
+support-izakaya.zendesk.com/hc/ja</div>
+        </div>
+
+        <div class="note">
+          <b>設計意図</b>
+          1通目は「使い方の全体像」を一気に渡す。3機能（レンディング／スワップ／カード購入）をまず認知させた上で、コア体験のレンディング開始までを5ステップで案内。実画面のスクリーンショット差し込みを推奨。
+        </div>
+
+        <div class="feedback-area" data-step="day0">
+          <div class="feedback-toggle" onclick="toggleFeedback(this)">
+            <span class="fb-icon">memo</span> フィードバック
+            <span class="fb-count"></span>
+          </div>
+          <div class="feedback-body">
+            <textarea class="feedback-textarea" data-key="fb-day0" placeholder="Day 0 へのコメント..." oninput="saveFeedback(this)"></textarea>
+            <div class="feedback-status"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-arrow"></div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- Day 1: キャンペーン紹介 -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="step" id="step-day1">
+    <div class="card card-border-orange">
+      <div class="card-header">
+        <span class="card-day">Day 1</span>
+        <span class="card-title">キャンペーン紹介（年利500% 新規体験レンディング ほか）</span>
+        <span class="badge badge-camp">キャンペーン</span>
+      </div>
+      <div class="card-body">
+        <div class="card-trigger"><b>トリガー</b>：登録から24時間後｜<b>配信形式</b>：HTMLメール（キャンペーンバナー差し込み推奨）</div>
+
+        <div class="mail-preview">
+          <div class="mail-head">
+            <span class="from">IZAKA-YA 運営事務局</span>
+            <span class="subj">【新規限定】年利500%の体験レンディングほか、開催中のお得なキャンペーン</span>
+          </div>
+          <div class="mail-body">{{user_name}} 様
+
+IZAKA-YAでは、ご登録いただいた方限定の特別キャンペーンを開催中です。
+通常の最大年利12%に加え、いま預けると以下の高金利が適用されます。
+
+<div class="camp-box">
+<div class="rate">年利 500<small>%</small></div>
+<h4>新規体験レンディング</h4>
+<p>ご登録直後にレンディングを開始した方が対象の、新規限定の超高金利体験プラン。預けてみて使い心地を試したい方に。</p>
+</div>
+
+<div class="camp-box">
+<div class="rate">年利 100<small>%</small></div>
+<h4>百祭り（延長中）</h4>
+<p>対象銘柄を一定期間預けるだけで、年利100%が適用される人気企画。期間延長中につき、いま預け始めると最大限活用できます。</p>
+</div>
+
+<div class="camp-box">
+<div class="rate">年利 33<small>%</small></div>
+<h4>三三祭り（6月末まで）</h4>
+<p>年利33%でじっくり運用できる定番企画。締切は6月末。安定運用したい方におすすめです。</p>
+</div>
+
+<a href="https://izakaya.tech/" class="cta">キャンペーン詳細を見る・始める</a>
+
+──────────────────────
+■ なぜ、こんな高金利が実現できる？
+──────────────────────
+IZAKA-YAは、預けられた暗号資産を<b>事業者向けに貸し出す</b>ことで運用しています。
+個人で運用するより、まとまった資金を機関に貸す方が高い金利が得られる仕組みです。
+
+──────────────────────
+■ ご利用にあたっての注意点
+──────────────────────
+　・キャンペーンには対象銘柄・期間・上限金額・最小金額などの条件があります
+　・各キャンペーンページで適用条件を必ずご確認ください
+　・暗号資産レンディングには元本毀損のリスクがあります
+
+<a href="https://izakaya.tech/" class="cta dark">いますぐ預けて高金利を受け取る</a>
+
+IZAKA-YA 運営事務局</div>
+        </div>
+
+        <div class="note">
+          <b>運用メモ</b>
+          キャンペーンの数値（500% / 100% / 33% / 6月末締切）は2026-05時点でizakaya.techに掲載中の内容を反映。<b>配信前にizakaya.techで最新のキャンペーンを必ず確認し、数値・締切を差し替えること</b>。終了済みキャンペーンを記載しないよう運用ルール化推奨。
+        </div>
+
+        <div class="feedback-area" data-step="day1">
+          <div class="feedback-toggle" onclick="toggleFeedback(this)">
+            <span class="fb-icon">memo</span> フィードバック
+            <span class="fb-count"></span>
+          </div>
+          <div class="feedback-body">
+            <textarea class="feedback-textarea" data-key="fb-day1" placeholder="Day 1 へのコメント..." oninput="saveFeedback(this)"></textarea>
+            <div class="feedback-status"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-arrow"></div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- Day 3: 教育＋FAQ -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="step" id="step-day3">
+    <div class="card card-border-gold">
+      <div class="card-header">
+        <span class="card-day">Day 3</span>
+        <span class="card-title">教育「眠っている暗号資産が、複利で育つ」＋ FAQ</span>
+        <span class="badge badge-edu">教育コンテンツ</span>
+      </div>
+      <div class="card-body">
+        <div class="card-trigger"><b>トリガー</b>：登録から3日後｜<b>配信形式</b>：HTMLメール（比較表ビジュアル）</div>
+
+        <div class="mail-preview">
+          <div class="mail-head">
+            <span class="from">IZAKA-YA 運営事務局</span>
+            <span class="subj">取引所に「ただ置いているだけ」の暗号資産、月にいくら逃していますか？</span>
+          </div>
+          <div class="mail-body">{{user_name}} 様
+
+「ガチホしているから、しばらく動かさない」
+そう考えている暗号資産は、実は<b>「機会損失」</b>が発生し続けています。
+
+ホールド戦略を変えなくても、IZAKA-YAなら<b>預けて待つだけ</b>。
+取引所に置きっぱなしの資産と、IZAKA-YAに預けた場合の差をご覧ください。
+
+<div class="compare-box">
+<div class="compare-row">
+<div class="compare-cell left head">取引所に「ただ置いているだけ」</div>
+<div class="compare-cell right head">IZAKA-YAに「預けておく」</div>
+</div>
+<div class="compare-row">
+<div class="compare-cell left">金利：基本0%（取引所による）</div>
+<div class="compare-cell right">通常時 <b>最大年利12%</b>。プロモ時 <b>100〜500%</b></div>
+</div>
+<div class="compare-row">
+<div class="compare-cell left">保管：取引所のホットウォレットに集中</div>
+<div class="compare-cell right">Fireblocks（MPC / HSM）採用・SOC 2 TYPE 2認証</div>
+</div>
+<div class="compare-row">
+<div class="compare-cell left">操作の手間：何もできない</div>
+<div class="compare-cell right">預ける／引き出すがアプリで完結。<b>最低1日から</b></div>
+</div>
+</div>
+
+──────────────────────
+■ シンプルな試算（USDT 100万円相当を1年間運用）
+──────────────────────
+　・取引所に置きっぱなし：<b>+0円</b>
+　・IZAKA-YA 通常レンディング（年利12%）：<b>+12万円</b>
+　・IZAKA-YA 百祭り（年利100%）：<b>+100万円</b>
+
+※利息は税法上の収益となります。詳細は税理士にご相談ください。
+
+──────────────────────
+■ よくあるご質問
+──────────────────────
+<b>Q. 元本が減るリスクはありますか？</b>
+A. 暗号資産レンディングには元本毀損のリスクがあります。預ける前に必ず利用規約・リスク説明をご確認ください。
+
+<b>Q. 預けている間、価格変動はどうなる？</b>
+A. 預けた銘柄そのものを保有している扱いになるため、<b>価格変動の影響は通常保有と同じ</b>です。値上がり益は引き続き獲得できます。
+
+<b>Q. 解除はいつでもできますか？</b>
+A. 商品によって異なります。「1日レンディング」は短期で柔軟、固定期間のものは期間中の解除に条件があります。
+
+<b>Q. 受け取った利息は、どの銘柄で支払われる？</b>
+A. 基本的には預けた銘柄と同じ銘柄でお支払いします。
+
+<a href="https://izakaya.tech/" class="cta gold">マイページで運用を始める</a>
+
+IZAKA-YA 運営事務局</div>
+        </div>
+
+        <div class="note">
+          <b>設計意図</b>
+          教育メールの核心は「機会損失を可視化」。同じガチホでも、置く場所を変えるだけで利息が発生することを定量で見せる。リスク表現は控えめにせず、Q1で「元本毀損リスクあり」と明示してコンプラ的にも整える。
+        </div>
+
+        <div class="feedback-area" data-step="day3">
+          <div class="feedback-toggle" onclick="toggleFeedback(this)">
+            <span class="fb-icon">memo</span> フィードバック
+            <span class="fb-count"></span>
+          </div>
+          <div class="feedback-body">
+            <textarea class="feedback-textarea" data-key="fb-day3" placeholder="Day 3 へのコメント..." oninput="saveFeedback(this)"></textarea>
+            <div class="feedback-status"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-arrow"></div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- Day 5: セキュリティ＋友人紹介 -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="step" id="step-day5">
+    <div class="card card-border-green">
+      <div class="card-header">
+        <span class="card-day">Day 5</span>
+        <span class="card-title">セキュリティ・運営体制＋友人紹介プログラム</span>
+        <span class="badge badge-sec">セキュリティ・紹介</span>
+      </div>
+      <div class="card-body">
+        <div class="card-trigger"><b>トリガー</b>：登録から5日後｜<b>配信形式</b>：HTMLメール（セキュリティバッジ／紹介リンク）</div>
+
+        <div class="mail-preview">
+          <div class="mail-head">
+            <span class="from">IZAKA-YA 運営事務局</span>
+            <span class="subj">【ご安心のために】IZAKA-YAのセキュリティ体制と、35ドルの友人紹介プログラム</span>
+          </div>
+          <div class="mail-body">{{user_name}} 様
+
+「暗号資産を預ける」を検討するときに、もっとも気になるのは<b>セキュリティ</b>かと思います。
+本日は、IZAKA-YAの運営体制と、お得な紹介プログラムについてご案内します。
+
+──────────────────────
+■ IZAKA-YAのセキュリティ体制
+──────────────────────
+
+<div class="security-grid">
+<div class="security-cell">
+<h5>Fireblocks 採用</h5>
+世界の主要金融機関・取引所も採用する、機関投資家向けカストディシステムを利用しています。
+</div>
+<div class="security-cell">
+<h5>MPC・HSM</h5>
+マルチパーティ計算（MPC）とハードウェアセキュリティモジュール（HSM）で、鍵管理を多層化。
+</div>
+<div class="security-cell">
+<h5>SOC 2 TYPE 2 認証</h5>
+セキュリティ・可用性・処理の完全性などについての第三者認証を取得しています。
+</div>
+<div class="security-cell">
+<h5>2段階認証</h5>
+ログイン・取引時に必須化することで、不正アクセスを防止します。
+</div>
+</div>
+
+──────────────────────
+■ Trustpilot 評価
+──────────────────────
+ユーザーレビューサイト Trustpilot で <b>4.5 / 5.0</b> の評価をいただいております。
+（"https://trustpilot.com" にて「IZAKA-YA」で検索）
+
+──────────────────────
+■ 友人紹介プログラム — お友達紹介で <b>35ドル</b> 受け取れます
+──────────────────────
+ご家族・お友達にIZAKA-YAをご紹介いただき、<b>200USDT以上のレンディングを開始</b>すると、紹介者・被紹介者の双方に<b>35ドル相当の報酬</b>が付与されます。
+
+　・条件：登録後60日以内に200USDT以上のレンディング開始
+　・対象外：1日レンディングはアフィリエイト報酬の対象外
+　・不正対策：複数アカウント・ウォッシュトレーディング等は対象外
+
+紹介リンクは、マイページの「紹介プログラム」からご取得いただけます。
+
+<a href="https://izakaya.tech/" class="cta green">紹介リンクを発行する</a>
+
+IZAKA-YA 運営事務局</div>
+        </div>
+
+        <div class="note">
+          <b>運用メモ</b>
+          セキュリティ訴求は「未稼働ユーザーの不安を分解する」のが目的。実画面に出すTrustpilotの数値、紹介報酬額（35ドル）は<b>配信前に最新値を必ず確認</b>。アフィリエイト規約（60日以内・200USDT以上・1日レンディング除外）はIZAKA-YA側の規約を引用しているので、変更があれば差し替え。
+        </div>
+
+        <div class="feedback-area" data-step="day5">
+          <div class="feedback-toggle" onclick="toggleFeedback(this)">
+            <span class="fb-icon">memo</span> フィードバック
+            <span class="fb-count"></span>
+          </div>
+          <div class="feedback-body">
+            <textarea class="feedback-textarea" data-key="fb-day5" placeholder="Day 5 へのコメント..." oninput="saveFeedback(this)"></textarea>
+            <div class="feedback-status"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-arrow"></div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- Day 7: クロスセル CryptoPawn -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="step" id="step-day7">
+    <div class="card card-border-gray">
+      <div class="card-header">
+        <span class="card-day">Day 7</span>
+        <span class="card-title">クロスセル「現金が必要ならCryptoPawn」</span>
+        <span class="badge badge-cross">クロスセル</span>
+      </div>
+      <div class="card-body">
+        <div class="card-trigger"><b>トリガー</b>：登録から7日後｜<b>配信形式</b>：HTMLメール＋関連サービスカード</div>
+
+        <div class="mail-preview">
+          <div class="mail-head">
+            <span class="from">IZAKA-YA 運営事務局</span>
+            <span class="subj">【もうひとつの選択肢】暗号資産を売らずに「現金を借りる」</span>
+          </div>
+          <div class="mail-body">{{user_name}} 様
+
+IZAKA-YAは、保有する暗号資産を<b>「預けて、金利を受け取る」</b>サービスです。
+一方で、いま現金が必要な方には、<b>暗号資産を担保にして「現金を借りる」</b>という選択肢もあります。
+
+姉妹サービスの<b>CryptoPawn</b>をご紹介します。
+
+<div class="cross-card">
+<h4>CryptoPawn — 暗号資産を売らずに、日本円で現金を調達</h4>
+<p>
+CryptoPawnは、保有する暗号資産を担保として預けることで、最短即日で日本円を借入できるサービスです。
+
+　・<b>月利0.1%（実質年率1.2%）・手数料0円</b>
+　・<b>個人5万円〜最大1,000万円</b>（法人30万円〜）
+　・<b>質流れ（強制決済）なし</b>。価格急落でも担保は没収されません
+　・返済すれば、預けた暗号資産は同じ枚数でそのまま戻ってきます
+　・売却ではないため、<b>譲渡所得課税の対象外</b>
+</p>
+<a href="https://cryptopawn.io/" class="cta dark">CryptoPawn（cryptopawn.io）を見る</a>
+</div>
+
+──────────────────────
+■ IZAKA-YA と CryptoPawn、どう使い分ける？
+──────────────────────
+　・<b>当面使う予定がない暗号資産</b>　→　IZAKA-YAで預けて金利を受け取る
+　・<b>今すぐ現金が必要</b>　→　CryptoPawnで担保にして借りる（売らずに現金化）
+
+特に、利確すると最大55%の税金が発生する方には、CryptoPawnの「売らずに借りる」が大きなメリットになります。
+
+タイミングや状況に応じて、保有する暗号資産の活かし方を選んでみてください。
+
+IZAKA-YA 運営事務局</div>
+        </div>
+
+        <div class="note">
+          <b>運用メモ</b>
+          CryptoPawn と IZAKA-YA は対称関係（借りる ⇔ 預けて貸す）。同じ「保有資産の活かし方」というテーマで対比すると説得力が出る。CryptoPawn の数値（月利0.1%・最大1,000万円）は2026-05時点。アフィリエイト／UTMリンクが指定されたらCTAに反映。
+        </div>
+
+        <div class="feedback-area" data-step="day7">
+          <div class="feedback-toggle" onclick="toggleFeedback(this)">
+            <span class="fb-icon">memo</span> フィードバック
+            <span class="fb-count"></span>
+          </div>
+          <div class="feedback-body">
+            <textarea class="feedback-textarea" data-key="fb-day7" placeholder="Day 7 へのコメント..." oninput="saveFeedback(this)"></textarea>
+            <div class="feedback-status"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-arrow"></div>
+
+  <!-- ════════════════════════════════════════ -->
+  <!-- Day 14: 最終リマインド -->
+  <!-- ════════════════════════════════════════ -->
+  <div class="step" id="step-day14">
+    <div class="card card-border-gray">
+      <div class="card-header">
+        <span class="card-day">Day 14</span>
+        <span class="card-title">最終リマインド（キャンペーン締切活用）</span>
+        <span class="badge badge-remind">最終リマインド</span>
+      </div>
+      <div class="card-body">
+        <div class="card-trigger"><b>トリガー</b>：登録から14日後、かつ <b>未稼働（レンディング未開始）</b>のユーザー｜<b>配信形式</b>：HTMLメール</div>
+
+        <div class="mail-preview">
+          <div class="mail-head">
+            <span class="from">IZAKA-YA 運営事務局</span>
+            <span class="subj">【あと少しでもったいない】キャンペーン期限と、まだ間に合うレンディング</span>
+          </div>
+          <div class="mail-body">{{user_name}} 様
+
+ご登録から2週間が経ちました。
+IZAKA-YAでは、いまも以下の高金利キャンペーンを開催中です。せっかくご登録いただいたのに、預けないまま終わってしまうのはもったいない、というのが正直なところです。
+
+──────────────────────
+■ いま預けて間に合うキャンペーン
+──────────────────────
+　・新規体験レンディング：年利<b>500%</b>（登録後の限定特典）
+　・百祭り 延長中：年利<b>100%</b>
+　・三三祭り：年利<b>33%</b>（6月末まで）
+
+<a href="https://izakaya.tech/" class="cta">キャンペーンを使って預け始める</a>
+
+──────────────────────
+■ よくある「動けない理由」
+──────────────────────
+<b>「金額が大きくないと意味がないのでは？」</b>
+　→ いいえ。<b>最低1日から</b>、お好きな金額で運用を始められます。
+
+<b>「セキュリティが不安」</b>
+　→ Fireblocks（MPC / HSM）採用・SOC 2 TYPE 2 認証取得。
+　　Trustpilot評価は 4.5 / 5.0 です。
+
+<b>「使い方が分からない」</b>
+　→ <a href="https://izakaya.tech/contact/" style="color:#e85d3c;">お問い合わせフォーム</a> もしくは <a href="https://support-izakaya.zendesk.com/hc/ja" style="color:#e85d3c;">サポートセンター</a> にてご質問いただけます。
+
+──────────────────────
+■ 「やっぱり現金が必要」という方は
+──────────────────────
+姉妹サービスの<b>CryptoPawn</b>では、暗号資産を売らずに最短即日で日本円を借入できます（月利0.1%・最大1,000万円・質流れなし）。
+
+<a href="https://cryptopawn.io/" class="cta dark">CryptoPawnを見る</a>
+
+──────────────────────
+今後、IZAKA-YA からの配信が不要な場合は、こちらから配信停止いただけます。
+{{unsubscribe_url}}
+
+引き続きどうぞよろしくお願いいたします。
+
+IZAKA-YA 運営事務局
+support-izakaya.zendesk.com/hc/ja</div>
+        </div>
+
+        <div class="note">
+          <b>設計意図</b>
+          最終リマインドは「キャンペーン締切」を理由にした最後の一押し。「動けない理由」を3つに分解してそれぞれに先回りで答えることで、心理的ハードルを下げる。それでも刺さらないユーザーに対しては、CryptoPawn という別の出口を用意（離脱ではなく姉妹サービスへの送客）。配信停止リンクをここで明示してCRMリストの健全性を維持。
+        </div>
+
+        <div class="feedback-area" data-step="day14">
+          <div class="feedback-toggle" onclick="toggleFeedback(this)">
+            <span class="fb-icon">memo</span> フィードバック
+            <span class="fb-count"></span>
+          </div>
+          <div class="feedback-body">
+            <textarea class="feedback-textarea" data-key="fb-day14" placeholder="Day 14 へのコメント..." oninput="saveFeedback(this)"></textarea>
+            <div class="feedback-status"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="export-bar">
+    <button class="export-btn" onclick="exportFeedback()">フィードバックをコピー</button>
+    <button class="export-btn danger" onclick="clearAllFeedback()">全コメントをクリア</button>
+  </div>
+
+</div>
+
+<script>
+  document.querySelectorAll('.feedback-textarea').forEach(t => {
+    const k = t.dataset.key;
+    const v = localStorage.getItem(k);
+    if (v) {
+      t.value = v;
+      const toggle = t.closest('.feedback-area').querySelector('.feedback-toggle');
+      toggle.classList.add('has-content');
+      const count = toggle.querySelector('.fb-count');
+      count.textContent = v.length + '字';
+    }
+  });
+
+  function toggleFeedback(el) {
+    const body = el.parentElement.querySelector('.feedback-body');
+    body.classList.toggle('open');
+  }
+
+  function saveFeedback(t) {
+    const k = t.dataset.key;
+    localStorage.setItem(k, t.value);
+    const status = t.parentElement.querySelector('.feedback-status');
+    status.textContent = '自動保存しました';
+    const toggle = t.closest('.feedback-area').querySelector('.feedback-toggle');
+    const count = toggle.querySelector('.fb-count');
+    if (t.value.length > 0) {
+      toggle.classList.add('has-content');
+      count.textContent = t.value.length + '字';
+    } else {
+      toggle.classList.remove('has-content');
+    }
+    setTimeout(() => { status.textContent = ''; }, 1500);
+  }
+
+  function exportFeedback() {
+    let out = '# IZAKA-YA ステップメール フィードバック\n\n';
+    document.querySelectorAll('.feedback-area').forEach(area => {
+      const step = area.dataset.step;
+      const ta = area.querySelector('.feedback-textarea');
+      if (ta.value.trim()) {
+        out += '## ' + step + '\n' + ta.value.trim() + '\n\n';
+      }
+    });
+    if (out === '# IZAKA-YA ステップメール フィードバック\n\n') {
+      alert('フィードバックがまだ入力されていません');
+      return;
+    }
+    navigator.clipboard.writeText(out).then(() => {
+      alert('フィードバックをクリップボードにコピーしました');
+    });
+  }
+
+  function clearAllFeedback() {
+    if (!confirm('全てのフィードバックを削除します。よろしいですか？')) return;
+    document.querySelectorAll('.feedback-textarea').forEach(t => {
+      t.value = '';
+      localStorage.removeItem(t.dataset.key);
+    });
+    document.querySelectorAll('.feedback-toggle').forEach(tg => tg.classList.remove('has-content'));
+  }
+</script>
+
+</body>
+</html>
