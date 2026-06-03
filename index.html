@@ -476,6 +476,14 @@
     <p><strong>サービス情報</strong>：IZAKA-YA（運営: Izakaya Limited / 香港）｜公式: <code>izakaya.tech</code>｜サポート: <code>support-izakaya.zendesk.com/hc/ja</code></p>
     <p><strong>USP</strong>：KYC不要・3分登録／最大年利12%（プロモ時100〜500%）／Fireblocks採用・SOC 2 TYPE 2認証／業界最安値のスワップ手数料／クレカでの仮想通貨購入対応</p>
     <p><strong>配信媒体</strong>：<b>SendGrid</b>（Marketing Campaigns / Dynamic Templates）にて配信</p>
+    <p><strong>監査ステータス</strong>：<b>PM監査PASS</b>（2026-05-15 / Round 4 / 50/60点 / 致命傷ゼロ）</p>
+    <p><strong>配信前チェックリスト</strong>：</p>
+    <ul>
+      <li>SendGrid Dynamic Templates の差し込み変数（<code>{{current_campaign_name}}</code> / <code>{{current_campaign_summary}}</code> / <code>{{current_campaign_deadline}}</code> / <code>{{current_campaign_assets}}</code>）に<b>フォールバック値</b>を設定（変数未挿入時の表示崩れ防止）</li>
+      <li>Day 5 の <b>Trustpilot評価値（現在4.5/5.0）</b>と<b>紹介報酬額（現在35ドル相当）</b>を配信前に最新値で再確認</li>
+      <li>Day 7 を未稼働セグメントに送る場合は、callout補完か出し分け設計を別途検討</li>
+      <li>Day 14 の「2週間で約4,600円」試算は通常年利12%ベース。500%/100%等の高金利キャンペーン併走時は、「キャンペーン適用ならさらに上振れの可能性」と一文添えることを検討</li>
+    </ul>
     <p><strong>全6通の役割分担</strong>：</p>
     <ul>
       <li><strong>Day 0</strong>：ウェルカム＋使い方の説明（レンディング／スワップ／カード購入の3機能）</li>
