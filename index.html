@@ -467,8 +467,8 @@
 
 <div class="container">
 
-  <!-- ── 全体設計 ── -->
-  <div class="intro">
+  <!-- ── 全体設計（非表示・ソースには保持） ── -->
+  <div class="intro" style="display:none;">
     <h2>このステップメールの設計方針</h2>
     <p>
       <strong>目的</strong>：会員登録済みの未稼働ユーザーを、教育＋キャンペーン訴求で「初回レンディング開始」まで導く。あわせて姉妹サービスCryptoPawnへのクロスセルで、暗号資産の活かし方の選択肢を広げる。
@@ -479,7 +479,7 @@
     <p><strong>監査ステータス</strong>：<b>PM監査PASS</b>（2026-05-15 / Round 4 / 50/60点 / 致命傷ゼロ）</p>
     <p><strong>配信前チェックリスト</strong>：</p>
     <ul>
-      <li>SendGrid Dynamic Templates の差し込み変数（<code>{{current_campaign_name}}</code> / <code>{{current_campaign_summary}}</code> / <code>{{current_campaign_deadline}}</code> / <code>{{current_campaign_assets}}</code>）に<b>フォールバック値</b>を設定（変数未挿入時の表示崩れ防止）</li>
+      <li>SendGrid Dynamic Templates の差し込み変数（<code>{{current_campaign_name}}</code> / <code>{{current_campaign_summary}}</code> / <code>{{current_campaign_deadline}}</code> / <code>{{current_campaign_assets}}</code> / <code>{{from_address}}</code>）に<b>フォールバック値</b>を設定（変数未挿入時の表示崩れ防止）</li>
       <li>Day 5 の <b>Trustpilot評価値（現在4.5/5.0）</b>と<b>紹介報酬額（現在35ドル相当）</b>を配信前に最新値で再確認</li>
       <li>Day 7 を未稼働セグメントに送る場合は、callout補完か出し分け設計を別途検討</li>
       <li>Day 14 の「2週間で約4,600円」試算は通常年利12%ベース。500%/100%等の高金利キャンペーン併走時は、「キャンペーン適用ならさらに上振れの可能性」と一文添えることを検討</li>
@@ -618,19 +618,22 @@ support-izakaya.zendesk.com/hc/ja</div>
           </div>
           <div class="mail-body">{{user_name}} 様
 
-ご登録ありがとうございます。
-IZAKA-YAでは、ご登録いただいた方にお得にスタートしていただけるよう、<b>新規ユーザー向けの特別キャンペーン</b>を年間を通して開催しています。
-
 ──────────────────────
 ■ 今、こんなキャンペーンが走っています
 ──────────────────────
 <b>{{current_campaign_name}}</b>：{{current_campaign_summary}}
 　└ 締切：<b>{{current_campaign_deadline}}</b>　／　対象銘柄：{{current_campaign_assets}}
 
-過去には<b>年利500%の新規体験レンディング</b>、<b>年利100%の百祭り</b>、<b>年利33%の三三祭り</b>など、通常の最大年利12%を大きく超える企画が定期的に開催されてきました。
 高金利の企画は<b>予告なく終了する</b>こともあるため、今のタイミングは下記から必ずチェックしてください。
 
 <a href="https://izakaya.tech/news/campaign/" class="cta">開催中のキャンペーンを見る</a>
+
+──────────────────────
+■ ご登録ありがとうございます
+──────────────────────
+IZAKA-YAでは、ご登録いただいた方にお得にスタートしていただけるよう、<b>新規ユーザー向けの特別キャンペーン</b>を年間を通して開催しています。
+
+過去には<b>年利500%の新規体験レンディング</b>、<b>年利100%の百祭り</b>、<b>年利33%の三三祭り</b>など、通常の最大年利12%を大きく超える企画が定期的に開催されてきました。
 
 ──────────────────────
 ■ ご利用にあたっての注意点
