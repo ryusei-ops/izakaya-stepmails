@@ -510,8 +510,8 @@
 
         <div class="mail-preview">
           <div class="mail-head">
-            <span class="from">IZAKA-YA 運営事務局 &lt;info@izakaya.tech&gt;</span>
-            <span class="subj">まずは2分の2段階認証から。眠ったままのBTC・USDTを動かす準備を整える</span>
+            <span class="from">IZAKA-YA 運営事務局 &lt;{{from_address}}&gt;</span>
+            <span class="subj">{{user_name}}様、ご登録完了。眠ったままのBTC・USDTを動かす準備を整える</span>
           </div>
           <div class="mail-body">{{user_name}} 様
 
@@ -544,8 +544,6 @@ VISA / Mastercard で<b>日本円から直接仮想通貨を購入</b>。取引�
 <div class="step-list"><ol>
 <li><b>マイページにログイン</b>
 └ <code>izakaya.tech</code> から登録メールアドレス／パスワードでログイン。</li>
-<li><b>2段階認証の設定（強く推奨）</b>
-└ セキュリティ設定から、2段階認証を有効化。資産保護のため最優先で設定をお願いします。</li>
 <li><b>暗号資産の入金</b>
 └ お手持ちの取引所／ウォレットから、IZAKA-YAのご自身のアドレスへ送金。
 └ または、クレジットカード（VISA / Mastercard）でその場で購入も可能。</li>
@@ -556,13 +554,6 @@ VISA / Mastercard で<b>日本円から直接仮想通貨を購入</b>。取引�
 </ol></div>
 
 <a href="https://izakaya.tech/" class="cta">マイページで始める（izakaya.tech）</a>
-
-──────────────────────
-■ まずは「2段階認証」の設定だけでも、今日のうちに
-──────────────────────
-本格的に運用を始める前でも、<b>2段階認証の設定だけは今日中に</b>済ませておくのがおすすめです。あとからまとめて設定するより、登録直後の数分で完了させてしまった方がスムーズです。
-
-<a href="https://izakaya.tech/" class="cta dark">2段階認証を設定する（約2分）</a>
 
 ──────────────────────
 ■ よくあるご質問
@@ -631,18 +622,12 @@ support-izakaya.zendesk.com/hc/ja</div>
 IZAKA-YAでは、ご登録いただいた方にお得にスタートしていただけるよう、<b>新規ユーザー向けの特別キャンペーン</b>を年間を通して開催しています。
 
 ──────────────────────
-■ なぜ、こんな高金利が実現できるのか？
-──────────────────────
-IZAKA-YAは、預けられた暗号資産を<b>機関（事業者）向けに貸し出す</b>ことで運用しています。
-個人が単独で運用するより、まとまった資金を機関に貸す方が高い金利が得られる構造です。預けたユーザー様には、その運用益の一部が金利として還元されます。
-
-──────────────────────
 ■ 今、こんなキャンペーンが走っています
 ──────────────────────
 <b>{{current_campaign_name}}</b>：{{current_campaign_summary}}
 　└ 締切：<b>{{current_campaign_deadline}}</b>　／　対象銘柄：{{current_campaign_assets}}
 
-過去には<b>年利500%の新規体験レンディング</b>、<b>年利100%の百祭り</b>、<b>総額5,000万円相当のGOLD RUSH × BOND FEST</b>など、通常の最大年利12%を大きく超える企画が定期的に開催されてきました。
+過去には<b>年利500%の新規体験レンディング</b>、<b>年利100%の百祭り</b>、<b>年利33%の三三祭り</b>など、通常の最大年利12%を大きく超える企画が定期的に開催されてきました。
 高金利の企画は<b>予告なく終了する</b>こともあるため、今のタイミングは下記から必ずチェックしてください。
 
 <a href="https://izakaya.tech/news/campaign/" class="cta">開催中のキャンペーンを見る</a>
@@ -659,7 +644,7 @@ IZAKA-YA 運営事務局</div>
 
         <div class="note">
           <b>運用メモ</b>
-          PM Round 3 の指摘「本文の金利温度感ゼロ」を解消。SendGrid Dynamic Templatesの差し込み変数 <code>{{current_campaign_name}}</code> <code>{{current_campaign_summary}}</code> <code>{{current_campaign_deadline}}</code> <code>{{current_campaign_assets}}</code> を本文上部に配置し、配信オペが現キャンペーンの情報1セット（名称・概要・締切・対象銘柄）を更新するだけで、本文全体は書き換え不要のまま温度感のある配信ができる構造に。過去事例（500%/100%/GOLD RUSH×BOND FEST）はフロー文に組み込み、訴求力を維持しつつ本文を短縮。
+          PM Round 3 の指摘「本文の金利温度感ゼロ」を解消。SendGrid Dynamic Templatesの差し込み変数 <code>{{current_campaign_name}}</code> <code>{{current_campaign_summary}}</code> <code>{{current_campaign_deadline}}</code> <code>{{current_campaign_assets}}</code> を本文上部に配置し、配信オペが現キャンペーンの情報1セット（名称・概要・締切・対象銘柄）を更新するだけで、本文全体は書き換え不要のまま温度感のある配信ができる構造に。過去事例（500%/100%/33%）はフロー文に組み込み、訴求力を維持しつつ本文を短縮。
         </div>
 
         <div class="feedback-area" data-step="day1">
@@ -798,17 +783,6 @@ IZAKA-YA 運営事務局</div>
 IZAKA-YAは、世界の機関投資家・金融機関も使う基盤技術の上で、お客様の資産を多層で守っています。
 
 ──────────────────────
-■ なぜ「KYC不要」と「機関級セキュリティ」が両立するのか
-──────────────────────
-「KYC（本人確認）が不要なのに、なぜ機関レベルのセキュリティを採用しているのか？」と疑問に思われる方もいらっしゃるかもしれません。
-
-これは、IZAKA-YAが<b>「ユーザーの本人確認」と「資産の保管」を切り離して設計している</b>ためです。
-　・<b>機関向け融資先の与信管理</b>：IZAKAYA Limited（運営会社）が実施
-　・<b>ユーザー資産の保管</b>：Fireblocksなど機関級のカストディ基盤で分離保管
-
-つまり、本人確認の手続きは不要でも、お預かりした資産そのものは、機関投資家と同じ基準で守られる構造です。
-
-──────────────────────
 ■ IZAKA-YAのセキュリティ体制
 ──────────────────────
 
@@ -824,10 +798,6 @@ IZAKA-YAは、世界の機関投資家・金融機関も使う基盤技術の上
 <div class="security-cell">
 <h5>SOC 2 TYPE 2 認証</h5>
 セキュリティ・可用性・処理の完全性などについての第三者認証を取得しています。
-</div>
-<div class="security-cell">
-<h5>2段階認証</h5>
-ログイン・取引時に必須化することで、不正アクセスを防止します。
 </div>
 </div>
 
@@ -920,7 +890,7 @@ IZAKA-YAでは、預けるだけでなく<b>「スワップ機能で銘柄を即
 <li><b>キャンペーンページで対象銘柄をチェック</b>
 └ いま高金利が出ている銘柄を確認します。</li>
 <li><b>マイページ内でスワップ</b>
-└ 業界最安値水準の手数料で、保有銘柄を対象銘柄に即時交換。取引所への送金は不要です。</li>
+└ 業界最安値の手数料で、保有銘柄を対象銘柄に即時交換します。</li>
 <li><b>そのままレンディング開始</b>
 └ 交換した銘柄を、対象キャンペーンに預けます。</li>
 </ol></div>
@@ -1012,7 +982,7 @@ IZAKA-YAでは、新規登録特典や期間限定の高金利キャンペーン
 　→ <a href="https://izakaya.tech/contact/" style="color:#e85d3c;">お問い合わせフォーム</a> もしくは <a href="https://support-izakaya.zendesk.com/hc/ja" style="color:#e85d3c;">サポートセンター</a> にてご質問いただけます。
 
 <b>「いまは時間がない／あとでやろうと思っている」</b>
-　→ <b>まずは2段階認証だけ、今日2分で済ませておく</b>のがおすすめです。これだけ済ませておけば、必要な時にすぐ預けられます。<a href="https://izakaya.tech/" style="color:#e85d3c;">マイページで2段階認証を設定する →</a>
+　→ まずは<b>少額から、最短のロックアップで一度試す</b>のがおすすめです。短時間で操作感が掴めますので、必要なときに改めて本格運用へ進めます。<a href="https://izakaya.tech/" style="color:#e85d3c;">マイページから少額で始める →</a>
 
 ──────────────────────
 ※「やっぱり現金が必要」という方は、暗号資産を売らずに借りられる姉妹サービス <a href="https://cryptopawn.io/" style="color:#e85d3c;">CryptoPawn</a> もご検討ください（月利0.1%・最大1,000万円・質流れなし）。
