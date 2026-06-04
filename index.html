@@ -619,12 +619,10 @@ support-izakaya.zendesk.com/hc/ja</div>
           <div class="mail-body">{{user_name}} 様
 
 ──────────────────────
-■ 今、こんなキャンペーンが走っています
+■ 現在開催中のキャンペーンはこちら
 ──────────────────────
-<b>{{current_campaign_name}}</b>：{{current_campaign_summary}}
-　└ 締切：<b>{{current_campaign_deadline}}</b>　／　対象銘柄：{{current_campaign_assets}}
-
-高金利の企画は<b>予告なく終了する</b>こともあるため、今のタイミングは下記から必ずチェックしてください。
+キャンペーンの内容・適用条件・締切は時期によって変動します。
+高金利の企画は<b>予告なく終了する</b>こともあるため、最新の開催情報は下記のキャンペーン一覧ページからご確認ください。
 
 <a href="https://izakaya.tech/news/campaign/" class="cta">開催中のキャンペーンを見る</a>
 
@@ -647,7 +645,7 @@ IZAKA-YA 運営事務局</div>
 
         <div class="note">
           <b>運用メモ</b>
-          PM Round 3 の指摘「本文の金利温度感ゼロ」を解消。SendGrid Dynamic Templatesの差し込み変数 <code>{{current_campaign_name}}</code> <code>{{current_campaign_summary}}</code> <code>{{current_campaign_deadline}}</code> <code>{{current_campaign_assets}}</code> を本文上部に配置し、配信オペが現キャンペーンの情報1セット（名称・概要・締切・対象銘柄）を更新するだけで、本文全体は書き換え不要のまま温度感のある配信ができる構造に。過去事例（500%/100%/33%）はフロー文に組み込み、訴求力を維持しつつ本文を短縮。
+          先方FB「差し込み変数が使えない可能性が高い」を反映し、Dynamic Template変数（<code>{{current_campaign_name}}</code> ほか）を撤去。本文は通年使える設計に統一し、最新のキャンペーン情報はキャンペーン一覧ページ（izakaya.tech/news/campaign/）への誘導で担保する。過去事例（年利500%/100%/33%）はフロー文として保持し、温度感を補う。
         </div>
 
         <div class="feedback-area" data-step="day1">
